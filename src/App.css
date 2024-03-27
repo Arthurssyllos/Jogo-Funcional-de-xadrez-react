@@ -11,6 +11,15 @@
   margin: auto;
 }
 
+.board-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+
+
 .row {
   display: flex;
 }

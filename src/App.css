@@ -1,4 +1,6 @@
 /* App.css */
+
+/* Estilos gerais da aplicação */
 .App {
   text-align: center;
 }
@@ -18,8 +20,6 @@
   height: 100vh;
 }
 
-
-
 .row {
   display: flex;
 }
@@ -31,8 +31,10 @@
   justify-content: center;
   align-items: center;
   font-size: 40px; /* Tamanho do ícone da peça */
+  transition: background-color 0.3s, border 0.3s; /* Transições suaves */
 }
 
+/* Tema padrão */
 .white {
   background-color: #f0d9b5; /* Cor das células brancas */
 }
@@ -42,9 +44,102 @@
 }
 
 .selected {
-  background-color: #ffce9e; /* Cor da célula selecionada */
+  border: 3px solid #ffce9e; /* Adiciona uma borda visível para seleção */
+  background-color: rgba(255, 206, 158, 0.3); /* Fundo da célula selecionada */
 }
 
-.current-player {
-  margin-top: 20px;
+/* Alto-contraste */
+.high-contrast .white {
+  background-color: #000000; /* Células brancas em alto contraste */
+  color: #ffffff; /* Cor das peças brancas em alto contraste */
+}
+
+.high-contrast .black {
+  background-color: #ffffff; /* Células pretas em alto contraste */
+  color: #000000; /* Cor das peças pretas em alto contraste */
+}
+
+.high-contrast .selected {
+  border: 3px solid #ffce9e; /* Borda visível para seleção em alto contraste */
+  background-color: rgba(255, 206, 158, 0.5); /* Fundo da célula selecionada */
+}
+
+/* Daltonismo */
+.color-blind .white {
+  background-color: #dcdcdc; /* Cor das células brancas para daltonismo */
+  color: #000000; /* Cor das peças */
+}
+
+.color-blind .black {
+  background-color: #6c6c6c; /* Cor das células pretas para daltonismo */
+  color: #ffffff; /* Cor das peças */
+}
+
+.color-blind .selected {
+  border: 3px solid #ffce9e; /* Borda visível para seleção em daltonismo */
+  background-color: rgba(255, 206, 158, 0.5); /* Fundo da célula selecionada */
+}
+
+/* Preto e Branco */
+.black-and-white .white {
+  background-color: #e0e0e0; /* Células brancas em preto e branco */
+  color: #000000; /* Cor das peças */
+}
+
+.black-and-white .black {
+  background-color: #a0a0a0; /* Células pretas em preto e branco */
+  color: #ffffff; /* Cor das peças */
+}
+
+.black-and-white .selected {
+  border: 3px solid #ffce9e; /* Borda visível para seleção em preto e branco */
+  background-color: rgba(255, 206, 158, 0.5); /* Fundo da célula selecionada */
+}
+
+/* Estilo do botão de tema */
+.theme-menu-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.theme-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.theme-button:hover {
+  background-color: #e0e0e0;
+}
+
+.theme-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 100%;
+}
+
+.theme-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.theme-menu button:hover {
+  background-color: #f0f0f0;
 }

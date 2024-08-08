@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChessRook, faChessKnight, faChessBishop, faChessQueen, faChessKing, faChessPawn } from '@fortawesome/free-solid-svg-icons';
@@ -14,29 +14,41 @@ const initialBoard = [
   ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
 ];
 
+const themes = [
+  '', // Tema padrão
+  'high-contrast', // Alto Contraste
+  'color-blind', // Daltonismo
+  'black-and-white' // Preto e Branco
+];
+
 function App() {
   const [board, setBoard] = useState(initialBoard);
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [currentPlayer, setCurrentPlayer] = useState('white');
+  const [themeIndex, setThemeIndex] = useState(0); // Índice do tema atual
+  const [showMenu, setShowMenu] = useState(false); // Estado para mostrar/esconder menu
+
+  useEffect(() => {
+    document.body.className = themes[themeIndex];
+  }, [themeIndex]);
 
   const renderPieceIcon = (piece) => {
     const isBlackPiece = piece === piece.toLowerCase();
-    const colorStyleBlack = isBlackPiece ? { color: 'black' } : {}; // Estilo para peças pretas
-    const colorStyleWhite = !isBlackPiece ? { color: 'white' } : {}; // Estilo para peças brancas
-  
+    const colorStyle = isBlackPiece ? { color: 'black' } : { color: 'white' };
+
     switch (piece.toLowerCase()) {
       case 'r':
-        return <FontAwesomeIcon icon={faChessRook} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessRook} style={colorStyle} />;
       case 'n':
-        return <FontAwesomeIcon icon={faChessKnight} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessKnight} style={colorStyle} />;
       case 'b':
-        return <FontAwesomeIcon icon={faChessBishop} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessBishop} style={colorStyle} />;
       case 'q':
-        return <FontAwesomeIcon icon={faChessQueen} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessQueen} style={colorStyle} />;
       case 'k':
-        return <FontAwesomeIcon icon={faChessKing} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessKing} style={colorStyle} />;
       case 'p':
-        return <FontAwesomeIcon icon={faChessPawn} style={{...colorStyleBlack, ...colorStyleWhite}} />;
+        return <FontAwesomeIcon icon={faChessPawn} style={colorStyle} />;
       default:
         return null;
     }
@@ -47,51 +59,39 @@ function App() {
     const targetPiece = board[targetRow][targetCol];
     const rowDiff = Math.abs(targetRow - startRow);
     const colDiff = Math.abs(targetCol - startCol);
-  
-    // Check if the target position is within the board bounds
+
     if (targetRow < 0 || targetRow > 7 || targetCol < 0 || targetCol > 7) {
       return false;
     }
-  
-    // Check if the target position is occupied by own piece
+
     if (targetPiece && piece === targetPiece) {
       return false;
     }
-  
-    // Rules for each piece type
+
     switch (piece.toLowerCase()) {
       case 'p': // Pawn
-        // Basic forward move or double forward move on the first move, diagonal capture
-        const direction = piece === 'p' ? 1 : -1; // Pawn direction (white or black)
+        const direction = piece === 'p' ? 1 : -1;
         if (targetCol === startCol) {
-          // Forward move
           if (!targetPiece) {
             if (rowDiff === 1) {
               return true;
             } else if (rowDiff === 2 && startRow === (piece === 'p' ? 1 : 6)) {
-              // Double forward move on the first move
               return !board[startRow + direction][startCol];
             }
           }
         } else {
-          // Diagonal capture
           return rowDiff === 1 && colDiff === 1 && targetPiece && isOpponentPiece(piece, targetPiece);
         }
         return false;
       case 'r': // Rook
-        // Horizontal or vertical moves
         return (startRow === targetRow || startCol === targetCol) && !isBlocked(startRow, startCol, targetRow, targetCol);
       case 'n': // Knight
-        // L-shaped moves
         return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
       case 'b': // Bishop
-        // Diagonal moves
         return rowDiff === colDiff && !isBlockedDiagonal(startRow, startCol, targetRow, targetCol);
       case 'q': // Queen
-        // Horizontal, vertical, or diagonal moves
         return ((startRow === targetRow || startCol === targetCol) || rowDiff === colDiff) && !isBlocked(startRow, startCol, targetRow, targetCol);
       case 'k': // King
-        // Single-square moves in any direction
         return rowDiff <= 1 && colDiff <= 1;
       default:
         return false;
@@ -104,58 +104,81 @@ function App() {
     let row = startRow + rowStep;
     let col = startCol + colStep;
     while (row !== targetRow || col !== targetCol) {
-      if (board[row][col]) {
-        return true; // There is a piece blocking the path
+      if (row < 0 || row > 7 || col < 0 || col > 7) return true; // Verificar se estamos fora dos limites
+      if (board[Math.round(row)][Math.round(col)]) {
+        return true;
       }
       row += rowStep;
       col += colStep;
     }
-    return false; // The path is unobstructed
+    return false;
   };
 
   const isBlockedDiagonal = (startRow, startCol, targetRow, targetCol) => {
-    const rowStep = targetRow > startRow ? 1 : -1;
-    const colStep = targetCol > startCol ? 1 : -1;
+    const rowStep = (targetRow - startRow) / Math.abs(targetRow - startRow);
+    const colStep = (targetCol - startCol) / Math.abs(targetCol - startCol);
     let row = startRow + rowStep;
     let col = startCol + colStep;
     while (row !== targetRow || col !== targetCol) {
-      if (board[row][col]) {
-        return true; // There is a piece blocking the path
+      if (row < 0 || row > 7 || col < 0 || col > 7) return true; // Verificar se estamos fora dos limites
+      if (board[Math.round(row)][Math.round(col)]) {
+        return true;
       }
       row += rowStep;
       col += colStep;
     }
-    return false; // The path is unobstructed
+    return false;
   };
 
   const isOpponentPiece = (piece, targetPiece) => {
-    return piece.toLowerCase() !== targetPiece.toLowerCase();
+    return (piece === piece.toLowerCase()) !== (targetPiece === targetPiece.toLowerCase());
   };
 
   const handleSquareClick = (row, col) => {
-    if (!selectedPiece) {
-      // If no piece is selected, select the piece at the clicked position
-      if (board[row][col] && (currentPlayer === 'white' ? board[row][col] === board[row][col].toUpperCase() : board[row][col] === board[row][col].toLowerCase())) {
-        setSelectedPiece({ row, col, piece: board[row][col] });
+    if (selectedPiece) {
+      const { row: startRow, col: startCol } = selectedPiece;
+      if (isValidMove(startRow, startCol, row, col) && !isBlocked(startRow, startCol, row, col)) {
+        const newBoard = board.map(row => row.slice());
+        newBoard[row][col] = newBoard[startRow][startCol];
+        newBoard[startRow][startCol] = null;
+        setBoard(newBoard);
+        setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
+        setSelectedPiece(null);
+      } else {
+        setSelectedPiece(null);
       }
     } else {
-      // If a piece is selected, attempt to move it to the clicked position
-      if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
-        const newBoard = board.map(row => [...row]);
-        newBoard[row][col] = selectedPiece.piece;
-        newBoard[selectedPiece.row][selectedPiece.col] = null;
-        setBoard(newBoard);
-        setSelectedPiece(null);
-        setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
-      } else {
-        // If the move is not valid, deselect the piece
-        setSelectedPiece(null);
+      const piece = board[row][col];
+      if (piece && ((piece === piece.toUpperCase() && currentPlayer === 'white') || (piece === piece.toLowerCase() && currentPlayer === 'black'))) {
+        setSelectedPiece({ row, col });
       }
     }
+  };
+
+  const handleThemeChange = (index) => {
+    setThemeIndex(index);
+    setShowMenu(false); // Fechar menu ao selecionar tema
   };
 
   return (
     <div className="App">
+      <h1>Xadrez na Web!</h1>
+      <div className="theme-menu-container">
+        <button className="theme-button" onClick={() => setShowMenu(!showMenu)}>
+          Mudar Tema
+        </button>
+        {showMenu && (
+          <div className="theme-menu">
+            {themes.map((theme, index) => (
+              <button key={index} onClick={() => handleThemeChange(index)}>
+                {theme === '' ? 'Tema Padrão' : 
+                 theme === 'high-contrast' ? 'Alto Contraste' : 
+                 theme === 'color-blind' ? 'Daltonismo' : 'Preto e Branco'}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="board-container">
         <div className="board">
           {board.map((row, rowIndex) => (
